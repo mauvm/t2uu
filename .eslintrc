@@ -1,0 +1,43 @@
+{
+	"parser": "babel-eslint",
+	"extends": [
+		"eslint:recommended"
+	],
+	"rules": {
+		"indent": [
+			2,
+			"tab"
+		],
+		"quotes": [
+			2,
+			"single"
+		],
+		"linebreak-style": [
+			2,
+			"unix"
+		],
+		"semi": [
+			2,
+			"never"
+		],
+		"comma-dangle": [
+			0,
+			"never"
+		],
+		"no-console": [
+			2
+		],
+		"no-ex-assign": [
+		    0
+		]
+	},
+	"env": {
+		"es6": true,
+		"node": true
+	},
+    "parserOptions": {
+        "sourceType": "module",
+		"allowImportExportEverywhere": false,
+		"codeFrame": false
+	}
+}

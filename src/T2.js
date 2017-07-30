@@ -50,6 +50,10 @@ export default class T2 {
 		return this.options.baseURL
 	}
 
+	async request () {
+		if ( ! this.session.request) await this.login()
+		return this.session.request
+	}
 	async sessionID () {
 		if ( ! this.session.id) await this.login()
 		return this.session.id
@@ -109,19 +113,20 @@ export default class T2 {
 		let resources = await request({ url: `${baseURL}/4G/V4g/${service}/resources`, json: true })
 		let resource = resources[0].identifier
 
-		this.session = { id, service, resource }
+		this.session = { request, id, service, resource }
 	}
 	clearSession () {
 		this.session = {}
 	}
 
 	async usage (retry = true) {
+		const request = await this.request()
 		const service = await this.service()
 		const resource = await this.resource()
 
 		try {
-			const usages = await requestPromise({
-				url: `${this.baseURL}/4G/V4g/services/${service}/usage`,
+			const usages = await request({
+				url: `${this.baseURL}/4G/V4g/${service}/usage`,
 				qs: {
 					resource,
 					level: '1',

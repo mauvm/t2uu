@@ -8,9 +8,14 @@ const t2 = new T2(config.t2)
 const tplink = new TPLINK(config.tplink)
 
 async function check () {
-	log.debug({ type: 'status' }, 'checking')
-	const { used, total } = await t2.usage()
-	if (used > total - config.bufferMB) await tplink.requestExtraGB()
+	log.debug({ type: 'check' }, 'starting')
+
+	try {
+		const { used, total } = await t2.usage()
+		if (used > total - config.bufferMB) await tplink.requestExtraGB()
+	} catch (err) {
+		log.error({ type: 'check' }, err)
+	}
 }
 
 new CronJob('17 */10 * * * *', check, null, true, 'Europe/Amsterdam')

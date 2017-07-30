@@ -109,7 +109,7 @@ export default class T2 {
 		let resources = await request({ url: `${baseURL}/4G/V4g/${service}/resources`, json: true })
 		let resource = resources[0].identifier
 
-		return { id, service, resource }
+		this.session = { id, service, resource }
 	}
 	clearSession () {
 		this.session = {}

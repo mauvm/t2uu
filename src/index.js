@@ -15,3 +15,4 @@ async function check () {
 
 new CronJob('17 */10 * * * *', check, null, true, 'Europe/Amsterdam')
 log.info({ type: 'status' }, 'started')
+check()

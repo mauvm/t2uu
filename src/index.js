@@ -12,6 +12,7 @@ async function check () {
 
 	try {
 		const { used, total } = await t2.usage()
+		log.info({ type: 'check', used, total }, 'usage')
 		if (used > total - config.bufferMB) await tplink.requestExtraGB()
 	} catch (err) {
 		log.error({ type: 'check' }, err)

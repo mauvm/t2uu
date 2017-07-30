@@ -8,30 +8,51 @@ export default class TPLINK {
 	}
 
 	call (body) {
+		const host = `http://${this.options.host}`
+		const token = new Buffer(this.options.password).toString('base64')
+
 		body = (Array.isArray(body) ? body.join(this.separator) : body) + this.separator
-		let token = new Buffer(this.options.password).toString('base64')
 
 		return request({
-			url: `http://${this.options.host}/cgi`,
+			url: `${host}/cgi?2`,
+			method: 'POST',
 			headers: {
+				'Accept': '*/*',
+				'Connection': 'keep-alive',
 				'Content-Type': 'text/plain',
 				'Cookie': `Authorization=Basic ${token}`,
+				'DNT': '1',
+				'Origin': host,
+				'Referer': host,
 			},
+			gzip: true,
 			body,
-		}).then((data) => {
-			if (data === '[error]0') return
-			throw new Error('Error response: ' + data)
+			resolveWithFullResponse: true,
+			simple: true,
+		}).then(({ statusCode, body }) => {
+			if (statusCode !== 200) {
+				throw new Error('Error response code: ' + statusCode)
+			}
+			if (body !== '[error]0') {
+				throw new Error('Error response: ' + body)
+			}
 		})
 	}
 
 	async requestExtraGB () {
 		log.info({ type: 'tplink' }, 'request-extra-gb')
 
-		return this.call([
+		const body = [
 			'[LTE_SMS_SENDNEWMSG#0,0,0,0,0,0#0,0,0,0,0,0]0,3',
 			'index=1',
 			'to=1280',
 			'textContent=NOG 1GB',
-		])
+		]
+
+		try {
+			return this.call(body)
+		} catch (err) {
+			return this.call(body) // Retry
+		}
 	}
 }

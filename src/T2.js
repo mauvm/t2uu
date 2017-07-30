@@ -145,6 +145,8 @@ export default class T2 {
 				total: usage.start,
 			}
 		} catch (err) {
+			log.error({ type: 'usage' }, err)
+
 			// Retry with new session
 			if (retry) {
 				this.clearSession()

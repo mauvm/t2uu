@@ -8,7 +8,7 @@ const t2 = new T2(config.t2)
 const tplink = new TPLINK(config.tplink)
 
 async function check () {
-	log.debug({ type: 'check' }, 'starting')
+	log.debug({ type: 'check' }, 'started')
 
 	try {
 		const { used, total } = await t2.usage()

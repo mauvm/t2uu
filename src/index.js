@@ -7,18 +7,25 @@ import log from './log'
 const t2 = new T2(config.t2)
 const tplink = new TPLINK(config.tplink)
 
+t2.on('login-attempt', () => log.info({ type: 't2' }, 'login-attempt'))
+t2.on('login', () => log.info({ type: 't2', session_id: t2.sessionID() }, 'login'))
+
 async function check () {
 	log.debug({ type: 'check' }, 'started')
 
 	try {
 		const { used, total } = await t2.usage()
 		log.info({ type: 'check', used, total }, 'usage')
-		if (used > total - config.bufferMB) await tplink.requestExtraGB()
+
+		if (used > total - config.bufferMB) {
+			log.info({ type: 'tplink' }, 'request-extra-gb')
+			await tplink.requestExtraGB()
+		}
 	} catch (err) {
 		log.error({ type: 'check' }, err)
 	}
 }
 
-new CronJob('17 */10 * * * *', check, null, true, 'Europe/Amsterdam')
+new CronJob('17 */5 * * * *', check, null, true, 'Europe/Amsterdam')
 log.info({ type: 'status' }, 'started')
 check()

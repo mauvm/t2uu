@@ -1,5 +1,4 @@
 import request from 'request-promise'
-import log from './log'
 
 export default class TPLINK {
 	constructor (options) {
@@ -40,8 +39,6 @@ export default class TPLINK {
 	}
 
 	async requestExtraGB () {
-		log.info({ type: 'tplink' }, 'request-extra-gb')
-
 		const body = [
 			'[LTE_SMS_SENDNEWMSG#0,0,0,0,0,0#0,0,0,0,0,0]0,3',
 			'index=1',

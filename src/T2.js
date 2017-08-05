@@ -1,8 +1,9 @@
+import util from 'util'
+import { EventEmitter } from 'events'
 import _ from 'lodash'
 import requestPromise from 'request-promise'
 import cheerio from 'cheerio'
 import urlResolver from 'url'
-import log from './log'
 
 function parseForm (res) {
 	let $ = cheerio.load(res.body)
@@ -40,8 +41,10 @@ function submitResponseForm (request, res, customFields = {}) {
 	})
 }
 
-export default class T2 {
+class T2 {
 	constructor (options) {
+		EventEmitter.call(this)
+
 		this.options = options
 		this.session = {}
 	}
@@ -50,25 +53,21 @@ export default class T2 {
 		return this.options.baseURL
 	}
 
-	async request () {
-		if ( ! this.session.request) await this.login()
+	request () {
 		return this.session.request
 	}
-	async sessionID () {
-		if ( ! this.session.id) await this.login()
+	sessionID () {
 		return this.session.id
 	}
-	async service () {
-		if ( ! this.session.service) await this.login()
+	service () {
 		return this.session.service
 	}
-	async resource () {
-		if ( ! this.session.resource) await this.login()
+	resource () {
 		return this.session.resource
 	}
 
 	async login () {
-		log.info({ type: 't2' }, 'login')
+		this.emit('login-attempt')
 
 		const baseURL = this.baseURL
 		const { username, password } = this.options
@@ -98,7 +97,7 @@ export default class T2 {
 		res = await submitResponseForm(request, res)
 		await submitResponseForm(request, res)
 
-		let id = _.find(jar._jar.serializeSync().cookies, ({ key, domain }) => {
+		const id = _.find(jar._jar.serializeSync().cookies, ({ key, domain }) => {
 			return key === 'JSESSIONID' && domain === baseURL.match(/\/\/(.+?)\//)[1]
 		}).value
 
@@ -114,21 +113,22 @@ export default class T2 {
 		let resource = resources[0].identifier
 
 		this.session = { request, id, service, resource }
+
+		this.emit('login')
 	}
 	clearSession () {
 		this.session = {}
 	}
 
 	async usage (retry = true) {
-		const request = await this.request()
-		const service = await this.service()
-		const resource = await this.resource()
+		if ( ! this.sessionID()) await this.login()
 
 		try {
+			const request  = this.request()
 			const usages = await request({
-				url: `${this.baseURL}/4G/V4g/${service}/usage`,
+				url: `${this.baseURL}/4G/V4g/${this.service()}/usage`,
 				qs: {
-					resource,
+					resource: this.resource(),
 					level: '1',
 					d: new Date().toString(),
 				},
@@ -145,8 +145,6 @@ export default class T2 {
 				total: usage.start,
 			}
 		} catch (err) {
-			log.error({ type: 'usage' }, err)
-
 			// Retry with new session
 			if (retry) {
 				this.clearSession()
@@ -157,3 +155,6 @@ export default class T2 {
 		}
 	}
 }
+
+util.inherits(T2, EventEmitter)
+export default T2

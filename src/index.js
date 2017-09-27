@@ -14,8 +14,8 @@ async function check () {
 	log.debug({ type: 'check' }, 'started')
 
 	try {
-		const { used, total } = await t2.usage()
-		log.info({ type: 'check', used, total }, 'usage')
+		const { used, total, updated_at } = await t2.usage()
+		log.info({ type: 'check', used, total, updated_at }, 'usage')
 
 		if (used > total - config.bufferMB) {
 			log.info({ type: 'tplink' }, 'request-extra-gb')

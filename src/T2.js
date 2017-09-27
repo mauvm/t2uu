@@ -143,6 +143,7 @@ class T2 {
 				used_percent: usage.used_percent / 100,
 				remaining: usage.remaining,
 				total: usage.start,
+				updated_at: usage.last_usage,
 			}
 		} catch (err) {
 			// Retry with new session

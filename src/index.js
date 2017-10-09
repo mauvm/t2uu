@@ -26,6 +26,9 @@ async function check () {
 	}
 }
 
-new CronJob('17 */5 * * * *', check, null, true, 'Europe/Amsterdam')
-log.info({ type: 'status' }, 'started')
-check()
+(async function () {
+	log.info({ type: 'status' }, 'started')
+	await tplink.requestExtraGB()
+	check()
+	new CronJob('17 */5 * * * *', check, null, true, 'Europe/Amsterdam')
+})()
